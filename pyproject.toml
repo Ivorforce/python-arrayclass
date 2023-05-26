@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "arrayclasses"
-version = "0.1.2"
+version = "0.1.3"
 description = "Analogue to dataclass that uses a numpy-backed array to store values."
 authors = ["Lukas Tenbrink <lukas.tenbrink@gmail.com>"]
 keywords = ["numpy", "dataclass"]

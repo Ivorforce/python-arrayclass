@@ -5,6 +5,7 @@ import numpy as np
 
 
 def from_array(cls, array):
+    array = np.asarray(array, dtype=cls.__VALUES_TYPE__)
     if cls.__VALUES_LEN__ != len(array):
         raise RuntimeError(
             f"cannot construct arrayclass '{cls}' of length {cls.__VALUES_LEN__} from array of length {len(array)}"
@@ -66,16 +67,12 @@ def _process_class(cls, **kwargs):
         for name, type in cls_annotations.items()
     ]
 
+    # Go through all the fields and prepare getters / setters.
     value_count = 0
     properties = dict()
     values_offsets = []
     types = []
 
-    # This will be called when the first setter is called in __init__.
-    def create_values_field(self):
-        self.values = np.empty(value_count, dtype=common_type)
-
-    # Go through all the fields and prepare getters / setters.
     for f in cls_fields:
         type_args = typing.get_args(f.type)
         field_length = len(type_args)
@@ -89,14 +86,12 @@ def _process_class(cls, **kwargs):
             index = slice(value_count, value_count + field_length)
             types.extend(type_args)
 
-        # index=index is a dirty hack; it would be better to construct the function from code
+        # TODO index=index is a dirty hack; it would be better to construct the function from code
         # but eh, that takes effort, right?
         def get(self, *, index=index):
             return self.values[index]
 
         def set(self, value, *, index=index):
-            if not hasattr(self, "values"):
-                create_values_field(self)
             self.values[index] = value
 
         properties[f.name] = property(fget=get, fset=set)
@@ -106,14 +101,23 @@ def _process_class(cls, **kwargs):
 
     common_type = np.find_common_type([], types)
 
-    # cls.values will be treated as if added by the user, resolving to a field
+    # Make it a dataclass!
     cls = dataclasses.dataclass(cls, **kwargs)
 
+    # Override the init
+    @functools.wraps(cls.__init__)
+    def init(self, *args, **kwargs):
+        self.values = np.empty(value_count, dtype=common_type)
+        self.__dataclass_init__(*args, **kwargs)
+
+    cls.__dataclass_init__ = cls.__init__
+    cls.__init__ = init
+
     # Add the created properties.
-    # Needs to happen after dataclasses.dataclass() because that one queries the assignments (field() or defaults)
+    # There's no references besides __init__ that values should be in __dict__ - so we can just make them properties.
+    # This needs to happen after dataclasses.dataclass() because that one queries the assignments (field() or defaults)
     for name, prop in properties.items():
         setattr(cls, name, prop)
-        pass
 
     # Make us accessible like an array, so things like tuple(obj) and np.array(obj) work.
     cls.__array__ = to_array
@@ -122,6 +126,7 @@ def _process_class(cls, **kwargs):
     cls.__setitem__ = setitem
 
     # Used in from_array()
+    cls.__VALUES_TYPE__ = common_type
     cls.__VALUES_OFFSETS__ = values_offsets
     cls.__VALUES_LEN__ = value_count
 

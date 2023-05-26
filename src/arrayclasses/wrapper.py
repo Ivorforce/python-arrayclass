@@ -101,7 +101,7 @@ def _process_class(cls, **kwargs):
         value_count += field_length
 
     # cls.values will be treated as if added by the user, resolving to a field
-    cls = dataclasses._process_class(cls, **kwargs)
+    cls = dataclasses.dataclass(cls, **kwargs)
 
     # Add the created properties.
     # Needs to happen after dataclasses.dataclass() because that one queries the assignments (field() or defaults)

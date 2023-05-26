@@ -9,24 +9,33 @@ A small `@dataclass`-like decorator for python classes. The class will store its
 ## Usage
 
 ```py
-import arrayclasses
-
-@arrayclasses.arrayclass
-class State:
-    x: float
-    y: tuple[float, float]
-    z: float
-
-# Object creation
-state = State(x=5, y=(0, 1), z=0)
-print(np.x)  # Prints 5.0
-print(np.y)  # Prints np.array([0.0, 1.0])
-state.y = 2.0
-print(np.y)  # Prints np.array([2.0, 2.0])
-
-# Array conversion.
-state = arrayclasses.from_array((5, 0, 1, 0))
-print(np.array(state))  # prints np.array([5.0, 0.0, 1.0, 0.0])
+def simulate(steps: int, fs: float) -> np.ndarray:
+    # Define the state class.
+    # Imagine we had 20 variables here...
+    @arrayclasses.arrayclass
+    class State:
+        x: float
+        y: float
+    
+    def step(t, xy):
+        # normally, this would be `x, y, ... = xy`
+        s = arrayclasses.from_array(State, xy)
+        a = 1 - np.sqrt(s.x ** 2 + s.y ** 2)
+        w = 2 * np.pi / (1 * fs)
+        
+        # normally, this would be `return (..., ...)`
+        return State(
+            x=a * s.x - w * s.y,
+            y=a * s.y + w * s.x,
+        )
+    
+    solved = integrate.solve_ivp(
+        fun=step,
+        y0=State(-1, 0),
+        t_span=(0, steps),
+        method="RK45"
+    )
+    return solved.y
 ```
 
 ## Why would I need this?
@@ -35,4 +44,4 @@ You may be forced, or inclined, to use numpy arrays in some situations where cla
 
 An example might be `scipy.integrate` - You are working with an array of numbers that really wants to be a class.
 
-Rather than packing and unpacking tuples, which is a common workaround, you might prefer to use an `@arrayclass` to get nicer code that plays well with your IDE.
+Packing and unpacking tuples is a common workaround. However, when you approach 10 or 20 variables, this gets quite messy fast. Now, you might prefer to use an `@arrayclass` to get nicer code that plays well with your IDE.

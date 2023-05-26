@@ -13,8 +13,8 @@ def from_array(cls, array):
     return cls(*np.split(array, cls.__VALUES_OFFSETS__[1:]))
 
 
-def to_array(object):
-    return np.copy(object.values)
+def to_array(object, *args, **kwargs):
+    return np.array(object.values, *args, **kwargs)
 
 
 def get_len(object):

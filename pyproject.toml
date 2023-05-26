@@ -1,9 +1,19 @@
 [tool.poetry]
 name = "arrayclasses"
-version = "0.1.0"
+version = "0.1.1"
 description = "Analogue to dataclass that uses a numpy-backed array to store values."
 authors = ["Lukas Tenbrink <lukas.tenbrink@gmail.com>"]
-license = "MIT License"
+keywords = ["numpy", "dataclass"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/Ivorforce/python-arrayclass"
+repository = "https://github.com/Ivorforce/python-arrayclass"
+include = [
+    "LICENSE",
+]
+packages = [
+    { include = "arrayclasses", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -3,6 +3,13 @@ import numpy as np
 
 
 @arrayclasses.arrayclass
+class IntState:
+    x: int
+    y: tuple[int, int]
+    z: int
+
+
+@arrayclasses.arrayclass
 class State:
     x: float
     y: tuple[float, float]
@@ -11,7 +18,12 @@ class State:
 
 def test_wrapper():
     # Object creation
-    state = State(x=5.0, y=(0, 1), z=0)
+    state = IntState(x=5, y=(0, 1), z=0)
+    np.testing.assert_equal(type(state.z), np.int64)
+    
+    state = State(x=5, y=(0, 1), z=0)
+    np.testing.assert_equal(type(state.z), np.float64)
+    
     np.testing.assert_equal(state.x, 5.0)
     np.testing.assert_array_equal(state.y, (0.0, 1.0))
     

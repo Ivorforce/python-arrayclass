@@ -69,21 +69,25 @@ def _process_class(cls, **kwargs):
     value_count = 0
     properties = dict()
     values_offsets = []
+    types = []
 
     # This will be called when the first setter is called in __init__.
     def create_values_field(self):
-        self.values = np.empty(value_count)
+        self.values = np.empty(value_count, dtype=common_type)
 
     # Go through all the fields and prepare getters / setters.
     for f in cls_fields:
-        field_length = len(typing.get_args(f.type))
+        type_args = typing.get_args(f.type)
+        field_length = len(type_args)
         if field_length == 0:
             # Single value
             index = value_count
             field_length = 1
+            types.append(f.type)
         else:
             # Multi-Value
             index = slice(value_count, value_count + field_length)
+            types.extend(type_args)
 
         # index=index is a dirty hack; it would be better to construct the function from code
         # but eh, that takes effort, right?
@@ -99,6 +103,8 @@ def _process_class(cls, **kwargs):
 
         values_offsets.append(value_count)
         value_count += field_length
+
+    common_type = np.find_common_type([], types)
 
     # cls.values will be treated as if added by the user, resolving to a field
     cls = dataclasses.dataclass(cls, **kwargs)

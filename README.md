@@ -28,3 +28,11 @@ print(np.y)  # Prints np.array([2.0, 2.0])
 state = arrayclasses.from_array((5, 0, 1, 0))
 print(np.array(state))  # prints np.array([5.0, 0.0, 1.0, 0.0])
 ```
+
+## Why would I need this?
+
+You may be forced, or inclined, to use numpy arrays in some situations where classes would be more appropriate.
+
+An example might be `scipy.integrate` - You are working with an array of numbers that really wants to be a class.
+
+Rather than packing and unpacking tuples, which is a common workaround, you might prefer to use an `@arrayclass` to get nicer code that plays well with your IDE.

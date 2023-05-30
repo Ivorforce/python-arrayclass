@@ -34,6 +34,7 @@ def setitem(object, item, value):
 def arrayclass(
     cls=None,
     /,
+    dtype=None,
     **kwargs
 ):
     """Calls dataclasses.dataclass. Also adds the following:
@@ -48,7 +49,7 @@ def arrayclass(
     """
 
     def wrap(cls):
-        return _process_class(cls, **kwargs)
+        return _process_class(cls, dtype=dtype, **kwargs)
 
     # See if we're being called as @arrayclass or @arrayclass().
     if cls is None:
@@ -59,7 +60,7 @@ def arrayclass(
     return wrap(cls)
 
 
-def _process_class(cls, **kwargs):
+def _process_class(cls, dtype=None, **kwargs):
     # Copied from dataclasses._process_class, it's not that bad to redo this
     cls_annotations = cls.__dict__.get("__annotations__", {})
     cls_fields = [
@@ -99,7 +100,8 @@ def _process_class(cls, **kwargs):
         values_offsets.append(value_count)
         value_count += field_length
 
-    common_type = np.find_common_type([], types)
+    if dtype is None:
+        dtype = np.find_common_type([], types)
 
     # Make it a dataclass!
     cls = dataclasses.dataclass(cls, **kwargs)
@@ -107,7 +109,7 @@ def _process_class(cls, **kwargs):
     # Override the init
     @functools.wraps(cls.__init__)
     def init(self, *args, **kwargs):
-        self.values = np.empty(value_count, dtype=common_type)
+        self.values = np.empty(value_count, dtype=dtype)
         self.__dataclass_init__(*args, **kwargs)
 
     cls.__dataclass_init__ = cls.__init__
@@ -126,7 +128,7 @@ def _process_class(cls, **kwargs):
     cls.__setitem__ = setitem
 
     # Used in from_array()
-    cls.__VALUES_TYPE__ = common_type
+    cls.__VALUES_TYPE__ = dtype
     cls.__VALUES_OFFSETS__ = values_offsets
     cls.__VALUES_LEN__ = value_count
 

@@ -38,6 +38,19 @@ def simulate(steps: int, fs: float) -> np.ndarray:
     return solved.y
 ```
 
+## Features
+
+```
+@arrayclasses.arrayclass(dtype=object)  # You can coerce the array dtype manually
+class Object:
+    x: float  # A single value.
+    y: tuple[float, float]  # Will yield np.ndarray windows, not tuples. This may be subject to change in the future.
+
+a = Object(x=5, y=(2, 3))
+print(len(a))  # 3
+print(tuple(a))  # (5, 2, 3)
+```
+
 ## Why would I need this?
 
 You may be forced, or inclined, to use numpy arrays in some situations where classes would be more appropriate.

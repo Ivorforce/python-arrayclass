@@ -43,8 +43,8 @@ def simulate(steps: int, fs: float) -> np.ndarray:
 ```
 @arrayclasses.arrayclass(dtype=object)  # You can coerce the array dtype manually
 class Object:
-    x: float  # A single value.
-    y: tuple[float, float]  # Will yield np.ndarray windows, not tuples. This may be subject to change in the future.
+    x: int  # A single value.
+    y: tuple[int, int]  # Will yield np.ndarray windows, not tuples. Should be np.ndarray[float, ...] but requires PEP 646 to work.
 
 a = Object(x=5, y=(2, 3))
 print(len(a))  # 3

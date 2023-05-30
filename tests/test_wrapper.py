@@ -9,6 +9,12 @@ class IntState:
     z: int
 
 
+@arrayclasses.arrayclass(dtype=object)
+class ObjectState:
+    x: int
+    y: float
+
+
 @arrayclasses.arrayclass
 class State:
     x: float
@@ -21,6 +27,12 @@ def test_wrapper():
     state = IntState(x=5, y=(0, 1), z=0)
     np.testing.assert_equal(type(state.z), np.int64)
     
+    # Object dtype
+    state = ObjectState(x=2, y=3.0)
+    np.testing.assert_equal(type(state.x), int)
+    np.testing.assert_equal(type(state.y), float)
+
+    # Float dtype
     state = State(x=5, y=(0, 1), z=0)
     np.testing.assert_equal(type(state.z), np.float64)
     

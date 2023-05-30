@@ -40,7 +40,7 @@ def simulate(steps: int, fs: float) -> np.ndarray:
 
 ## Features
 
-```
+```py
 @arrayclasses.arrayclass(dtype=object)  # You can coerce the array dtype manually
 class Object:
     x: int  # A single value.
